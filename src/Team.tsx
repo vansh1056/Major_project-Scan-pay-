@@ -5,23 +5,23 @@ const teamMembers = [
   {
     name: "Vansh Singh",
     role: "Frontend Developer",
-    image: "/images/member1.jpg",
+    image: "images/member1.jpg",
     // bio:" ahfjsbnfkugjsdkfnsiukfjasifugyvashfnsdufyhsaWVkf",
   },
   {
     name: "Shiv Panwar",
     role: "Backend Developer",
-    image: "/images/member2.jpeg",
+    image: "images/member2.jpeg",
   },
   {
     name: "Sharandeep Meharwal",
     role: "Database Manager",
-    image: "/images/member3.jpeg",
+    image: "images/member3.jpeg",
   },
   {
     name: "Yaduvendra Choudhary",
     role: "Documentation Specialist",
-    image: "/images/member4.jpeg",
+    image: "images/member4.jpeg",
   },
 ];
 
