@@ -5,23 +5,22 @@ const teamMembers = [
   {
     name: "Vansh Singh",
     role: "Frontend Developer",
-    image: "images/member1.jpg",
-    // bio:" ahfjsbnfkugjsdkfnsiukfjasifugyvashfnsdufyhsaWVkf",
+    image: "/images/member1.jpg",
   },
   {
     name: "Shiv Panwar",
     role: "Backend Developer",
-    image: "images/member2.jpeg",
+    image: "/images/member2.jpeg",
   },
   {
     name: "Sharandeep Meharwal",
     role: "Database Manager",
-    image: "images/member3.jpeg",
+    image: "/images/member3.jpeg",
   },
   {
     name: "Yaduvendra Choudhary",
     role: "Documentation Specialist",
-    image: "images/member4.jpeg",
+    image: "/images/member4.jpeg",
   },
 ];
 
@@ -54,7 +53,7 @@ function Team() {
           />
           <h2 className="mt-4 text-xl font-semibold">{teamMembers[currentIndex].name}</h2>
           <p className="text-gray-400">{teamMembers[currentIndex].role}</p>
-          {/* <h3 className="text-gray-300">{teamMembers[currentIndex].bio}</h3> */}
+          
         </div>
 
         <div className="flex justify-between w-full mt-4">
