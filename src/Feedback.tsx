@@ -10,7 +10,7 @@ const Feedback = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-8 flex flex-col items-center">
+    <div className="h-full bg-gray-900 text-gray-100 p-8 flex flex-col items-center">
       <h1 className="text-2xl font-bold mb-6">Feedback</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-md">
         <textarea

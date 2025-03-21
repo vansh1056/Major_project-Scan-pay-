@@ -1,45 +1,85 @@
-import React from "react";
+import React, { useState } from "react";
+import { useSwipeable } from "react-swipeable";
 
 const teamMembers = [
   {
-    name: "VANSH SINGH",
+    name: "Vansh Singh",
     role: "Frontend Developer",
-    image: "/images/vansh.jpg", // Replace with actual image path
+    image: "/Images/member1.jpg",
+    // bio:" ahfjsbnfkugjsdkfnsiukfjasifugyvashfnsdufyhsaWVkf",
   },
   {
-    name: "Member 2",
+    name: "Shiv Panwar",
     role: "Backend Developer",
-    image: "/images/member2.jpg",
+    image: "/Images/member2.jpeg",
   },
   {
-    name: "Member 3",
+    name: "Sharandeep Meharwal",
     role: "Database Manager",
-    image: "/images/member3.jpg",
+    image: "/Images/member3.jpeg",
   },
   {
-    name: "Member 4",
-    role: "UI/UX Designer",
-    image: "/images/member4.jpg",
+    name: "Yaduvendra Choudhary",
+    role: "Documentation Specialist",
+    image: "/Images/member4.jpeg",
   },
 ];
 
 function Team() {
-  return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center p-8">
-      <h1 className="text-3xl font-bold mb-6 text-white">Our Project Team</h1>
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-      <div className="flex justify-center space-x-8">
-        {teamMembers.map((member, index) => (
-          <div key={index} className="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col items-center border border-gray-700 w-64">
-            <img
-              src={member.image}
-              alt={member.name}
-              className="w-40 h-40 rounded-full border-4 border-gray-600 shadow-md"
-            />
-            <h2 className="mt-4 text-xl font-semibold">{member.name}</h2>
-            <p className="text-gray-400">{member.role}</p>
-          </div>
-        ))}
+  const handleSwipedLeft = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % teamMembers.length);
+  };
+
+  const handleSwipedRight = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + teamMembers.length) % teamMembers.length);
+  };
+
+  const handlers = useSwipeable({
+    onSwipedLeft: handleSwipedLeft,
+    onSwipedRight: handleSwipedRight,
+  });
+
+  return (
+    <div className="h-full bg-gray-900 text-gray-100 flex flex-col items-center p-8">
+      <h1 className="text-2xl font-bold mb-6 text-white">Project Team</h1>
+
+      <div {...handlers} className="w-full max-w-md flex flex-col items-center">
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col items-center border border-gray-700 w-full">
+          <img
+            src={teamMembers[currentIndex].image}
+            alt={teamMembers[currentIndex].name}
+            className="w-50 h-50 rounded-full border-4 border-gray-600 shadow-md"
+          />
+          <h2 className="mt-4 text-xl font-semibold">{teamMembers[currentIndex].name}</h2>
+          <p className="text-gray-400">{teamMembers[currentIndex].role}</p>
+          {/* <h3 className="text-gray-300">{teamMembers[currentIndex].bio}</h3> */}
+        </div>
+
+        <div className="flex justify-between w-full mt-4">
+          <button
+            onClick={handleSwipedRight}
+            className="bg-gray-700 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition"
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleSwipedLeft}
+            className="bg-gray-700 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition"
+          >
+            Next
+          </button>
+        </div>
+
+        <div className="flex mt-4 space-x-2">
+          {teamMembers.map((_, index) => (
+            <div
+              key={index}
+              className={`h-2 w-2 rounded-full ${index === currentIndex ? 'bg-white' : 'bg-gray-500'}`}
+            ></div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -80,7 +80,7 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-8 flex justify-center items-center">
+    <div className="h-full bg-gray-900 text-gray-100 p-8 flex justify-center items-center">
       <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700">
         <div className="flex items-center justify-center mb-6">
           <Printer className="h-12 w-12 text-green-400" />
