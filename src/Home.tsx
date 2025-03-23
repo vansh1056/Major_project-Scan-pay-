@@ -89,7 +89,7 @@ function Home() {
 
         {/* QR Scanner Section */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3 text-gray-300">100000. Scan Printer QR Code</h2>
+          <h2 className="text-lg font-semibold mb-3 text-gray-300"> Scan Printer QR Code</h2>
           {!printerIP && (
             <button
               onClick={startScanner}
@@ -108,7 +108,7 @@ function Home() {
 
         {/* File Upload Section */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3 text-gray-300">2. Select PDF File</h2>
+          <h2 className="text-lg font-semibold mb-3 text-gray-300">Select PDF File</h2>
           <div className="flex items-center justify-center w-full">
             <label className="w-full flex flex-col items-center px-4 py-6 bg-gray-700 rounded-lg border-2 border-dashed border-gray-500 cursor-pointer hover:bg-gray-600 transition">
               <Upload className="h-8 w-8 text-gray-400" />
