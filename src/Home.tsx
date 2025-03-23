@@ -89,7 +89,7 @@ function Home() {
 
         {/* QR Scanner Section */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3 text-gray-300">1. Scan Printer QR Code</h2>
+          <h2 className="text-lg font-semibold mb-3 text-gray-300">100000. Scan Printer QR Code</h2>
           {!printerIP && (
             <button
               onClick={startScanner}

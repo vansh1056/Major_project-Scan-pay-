@@ -53,7 +53,6 @@ function Team() {
           />
           <h2 className="mt-4 text-xl font-semibold">{teamMembers[currentIndex].name}</h2>
           <p className="text-gray-400">{teamMembers[currentIndex].role}</p>
-          
         </div>
 
         <div className="flex justify-between w-full mt-4">
