@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { Printer, Upload, CheckCircle, AlertCircle, Camera } from "lucide-react";
-import axios from "axios";
 
 function Home() {
   const [printerIP, setPrinterIP] = useState<string>("");
@@ -9,6 +9,15 @@ function Home() {
   const [status, setStatus] = useState<"idle" | "scanning" | "success" | "error">("idle");
   const [message, setMessage] = useState<string>("");
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+
+  useEffect(() => {
+    // Cleanup scanner on component unmount
+    return () => {
+      scannerRef.current?.clear().catch((err) => {
+        console.warn("Scanner cleanup failed:", err);
+      });
+    };
+  }, []);
 
   const startScanner = () => {
     if (scannerRef.current) {
@@ -27,7 +36,8 @@ function Home() {
 
     scannerRef.current.render(
       (decodedText) => {
-        const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        const ipRegex =
+          /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
         if (ipRegex.test(decodedText)) {
           setPrinterIP(decodedText);
           setStatus("success");
@@ -48,7 +58,13 @@ function Home() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
+      const file = event.target.files[0];
+      if (file.type !== "application/pdf") {
+        setStatus("error");
+        setMessage("Only PDF files are allowed");
+        return;
+      }
+      setSelectedFile(file);
     }
   };
 
@@ -89,7 +105,7 @@ function Home() {
 
         {/* QR Scanner Section */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3 text-gray-300"> Scan Printer QR Code</h2>
+          <h2 className="text-lg font-semibold mb-3 text-gray-300">Scan Printer QR Code</h2>
           {!printerIP && (
             <button
               onClick={startScanner}
@@ -132,6 +148,21 @@ function Home() {
         >
           Print Document
         </button>
+
+        {/* Status Message */}
+        {message && (
+          <div
+            className={`mt-4 p-2 rounded-md text-center text-sm font-medium ${
+              status === "success"
+                ? "bg-green-600 text-green-100"
+                : status === "error"
+                ? "bg-red-600 text-red-100"
+                : "bg-gray-700 text-gray-300"
+            }`}
+          >
+            {message}
+          </div>
+        )}
       </div>
     </div>
   );
