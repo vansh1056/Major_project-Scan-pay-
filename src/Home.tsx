@@ -130,9 +130,10 @@ function Home() {
       setStatus("printing");
       setMessage("Sending print job...");
 
-      await axios.post(`http://${printerIP}/print`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axios.post(`http://${printerIP}:5000/print`, formData, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
+
 
       setStatus("success");
       setMessage("Print job sent successfully!");
