@@ -11,11 +11,13 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
-import * as pdfjsLib from "pdfjs-dist/build/pdf";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.entry";
+import * as pdfjsLib from 'pdfjs-dist';
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-// Set up worker
+
+// Tell PDF.js to use the worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+
 
 function Home() {
   const [printerIP, setPrinterIP] = useState<string>("");
@@ -130,6 +132,9 @@ function Home() {
       setStatus("printing");
       setMessage("Sending print job...");
 
+      await axios.post(`http://${printerIP}/print`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       await axios.post(`http://${printerIP}:5000/print`, formData, {
   headers: { "Content-Type": "multipart/form-data" },
 });
