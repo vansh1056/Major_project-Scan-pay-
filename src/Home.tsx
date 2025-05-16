@@ -107,6 +107,11 @@ function Home() {
   };
 
   const confirmPrint = () => {
+    if (!selectedFile || !printerIP || !pageCount || !totalCost) {
+      setStatus("error");
+      setMessage("Complete all steps before printing.");
+      return;
+    }
     setShowModal(true);
   };
 
@@ -141,7 +146,6 @@ function Home() {
   return (
     <div className="h-full bg-gray-900 text-gray-100 p-8 flex justify-center items-center">
       <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700 relative">
-        {/* Header */}
         <div className="flex items-center justify-center mb-6">
           <Printer className="h-12 w-12 text-green-400" />
           <h1 className="text-2xl font-bold ml-3 text-gray-200">QR Printer Control</h1>
@@ -183,6 +187,14 @@ function Home() {
           </label>
         </div>
 
+        {/* Page Count & Cost */}
+        {pageCount !== null && totalCost !== null && (
+          <div className="mb-6 text-center text-sm text-gray-300">
+            <p>Pages: <strong>{pageCount}</strong></p>
+            <p>Total Cost: <strong>₹{totalCost}</strong></p>
+          </div>
+        )}
+
         {/* Print Button */}
         <button
           onClick={confirmPrint}
@@ -215,7 +227,7 @@ function Home() {
           </div>
         )}
 
-        {/* Confirmation Modal */}
+        {/* Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-600 max-w-sm w-full">
