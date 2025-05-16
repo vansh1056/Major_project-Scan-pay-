@@ -11,15 +11,21 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
+import * as pdfjsLib from "pdfjs-dist/build/pdf";
+import pdfWorker from "pdfjs-dist/build/pdf.worker.entry";
+
+// Set up worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 function Home() {
   const [printerIP, setPrinterIP] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [status, setStatus] = useState<
-    "idle" | "scanning" | "success" | "error" | "printing"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "scanning" | "success" | "error" | "printing">("idle");
   const [message, setMessage] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [pageCount, setPageCount] = useState<number | null>(null);
+  const [totalCost, setTotalCost] = useState<number | null>(null);
+  const costPerPage = 2;
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
@@ -76,9 +82,27 @@ function Home() {
         setMessage("Only PDF files are allowed.");
         return;
       }
+
       setSelectedFile(file);
       setMessage(`Selected file: ${file.name}`);
       setStatus("idle");
+
+      // Count pages
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const typedarray = new Uint8Array(reader.result as ArrayBuffer);
+          const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+          setPageCount(pdf.numPages);
+          const cost = pdf.numPages * costPerPage;
+          setTotalCost(cost);
+        } catch (err) {
+          setStatus("error");
+          setMessage("Failed to read PDF file.");
+          console.error("PDF parsing error:", err);
+        }
+      };
+      reader.readAsArrayBuffer(file);
     }
   };
 
@@ -117,18 +141,15 @@ function Home() {
   return (
     <div className="h-full bg-gray-900 text-gray-100 p-8 flex justify-center items-center">
       <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700 relative">
+        {/* Header */}
         <div className="flex items-center justify-center mb-6">
           <Printer className="h-12 w-12 text-green-400" />
-          <h1 className="text-2xl font-bold ml-3 text-gray-200">
-            QR Printer Control
-          </h1>
+          <h1 className="text-2xl font-bold ml-3 text-gray-200">QR Printer Control</h1>
         </div>
 
-        {/* QR Scanner Section */}
+        {/* QR Scanner */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3 text-gray-300">
-            Scan Printer QR Code
-          </h2>
+          <h2 className="text-lg font-semibold mb-3 text-gray-300">Scan Printer QR Code</h2>
           {!printerIP && (
             <button
               onClick={startScanner}
@@ -137,10 +158,7 @@ function Home() {
               <Camera className="h-5 w-5 mr-2" /> Start Scanner
             </button>
           )}
-          <div
-            id="qr-reader"
-            className="mt-4 border border-gray-600 rounded-lg p-2"
-          ></div>
+          <div id="qr-reader" className="mt-4 border border-gray-600 rounded-lg p-2"></div>
           {printerIP && (
             <div className="mt-2 p-2 bg-gray-700 rounded-md text-center text-green-300">
               <p className="text-sm">Printer IP: {printerIP}</p>
@@ -148,11 +166,9 @@ function Home() {
           )}
         </div>
 
-        {/* File Upload Section */}
+        {/* File Upload */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3 text-gray-300">
-            Select PDF File
-          </h2>
+          <h2 className="text-lg font-semibold mb-3 text-gray-300">Select PDF File</h2>
           <label className="w-full flex flex-col items-center px-4 py-6 bg-gray-700 rounded-lg border-2 border-dashed border-gray-500 cursor-pointer hover:bg-gray-600 transition">
             <Upload className="h-8 w-8 text-gray-400" />
             <span className="mt-2 text-sm text-gray-400">
@@ -180,7 +196,7 @@ function Home() {
           Print Document
         </button>
 
-        {/* Feedback Message */}
+        {/* Status Message */}
         {message && (
           <div
             className={`mt-4 p-2 rounded-md text-center text-sm font-medium ${
@@ -199,13 +215,19 @@ function Home() {
           </div>
         )}
 
-        {/* Modal for Print Confirmation */}
+        {/* Confirmation Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-600 max-w-sm w-full">
               <h3 className="text-xl text-white font-semibold mb-4">Confirm Print</h3>
+              <p className="text-gray-300 mb-2">
+                File: <strong>{selectedFile?.name}</strong>
+              </p>
+              <p className="text-gray-300 mb-2">
+                Pages: <strong>{pageCount ?? "Calculating..."}</strong>
+              </p>
               <p className="text-gray-300 mb-4">
-                Are you sure you want to print <strong>{selectedFile?.name}</strong>?
+                Total Cost: <strong>₹{totalCost ?? "--"}</strong>
               </p>
               <div className="flex justify-end gap-4">
                 <button
