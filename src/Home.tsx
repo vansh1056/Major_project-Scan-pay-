@@ -1,17 +1,28 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from "html5-qrcode";
-import { Printer, Upload, CheckCircle, AlertCircle, Camera } from "lucide-react";
+import {
+  Html5QrcodeScanner,
+  Html5QrcodeSupportedFormats,
+} from "html5-qrcode";
+import {
+  Printer,
+  Upload,
+  Camera,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 
 function Home() {
   const [printerIP, setPrinterIP] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [status, setStatus] = useState<"idle" | "scanning" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "scanning" | "success" | "error" | "printing"
+  >("idle");
   const [message, setMessage] = useState<string>("");
+  const [showModal, setShowModal] = useState<boolean>(false);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
-    // Cleanup scanner on component unmount
     return () => {
       scannerRef.current?.clear().catch((err) => {
         console.warn("Scanner cleanup failed:", err);
@@ -41,11 +52,11 @@ function Home() {
         if (ipRegex.test(decodedText)) {
           setPrinterIP(decodedText);
           setStatus("success");
-          setMessage("QR Code scanned successfully!");
+          setMessage("Printer connected via QR successfully!");
           scannerRef.current?.clear();
         } else {
           setStatus("error");
-          setMessage("Invalid IP address format in QR code");
+          setMessage("Invalid QR Code. Not a valid IP address.");
         }
       },
       (error) => {
@@ -54,6 +65,7 @@ function Home() {
     );
 
     setStatus("scanning");
+    setMessage("Scanner started...");
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,17 +73,24 @@ function Home() {
       const file = event.target.files[0];
       if (file.type !== "application/pdf") {
         setStatus("error");
-        setMessage("Only PDF files are allowed");
+        setMessage("Only PDF files are allowed.");
         return;
       }
       setSelectedFile(file);
+      setMessage(`Selected file: ${file.name}`);
+      setStatus("idle");
     }
   };
 
+  const confirmPrint = () => {
+    setShowModal(true);
+  };
+
   const handlePrint = async () => {
+    setShowModal(false);
     if (!selectedFile || !printerIP) {
       setStatus("error");
-      setMessage("Please scan a QR code and select a PDF file first");
+      setMessage("Please scan a QR code and select a PDF file.");
       return;
     }
 
@@ -79,7 +98,7 @@ function Home() {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      setStatus("idle");
+      setStatus("printing");
       setMessage("Sending print job...");
 
       await axios.post(`http://${printerIP}/print`, formData, {
@@ -97,15 +116,19 @@ function Home() {
 
   return (
     <div className="h-full bg-gray-900 text-gray-100 p-8 flex justify-center items-center">
-      <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700">
+      <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700 relative">
         <div className="flex items-center justify-center mb-6">
           <Printer className="h-12 w-12 text-green-400" />
-          <h1 className="text-2xl font-bold ml-3 text-gray-200">QR Printer Control</h1>
+          <h1 className="text-2xl font-bold ml-3 text-gray-200">
+            QR Printer Control
+          </h1>
         </div>
 
         {/* QR Scanner Section */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3 text-gray-300">Scan Printer QR Code</h2>
+          <h2 className="text-lg font-semibold mb-3 text-gray-300">
+            Scan Printer QR Code
+          </h2>
           {!printerIP && (
             <button
               onClick={startScanner}
@@ -114,7 +137,10 @@ function Home() {
               <Camera className="h-5 w-5 mr-2" /> Start Scanner
             </button>
           )}
-          <div id="qr-reader" className="mt-4 border border-gray-600 rounded-lg p-2"></div>
+          <div
+            id="qr-reader"
+            className="mt-4 border border-gray-600 rounded-lg p-2"
+          ></div>
           {printerIP && (
             <div className="mt-2 p-2 bg-gray-700 rounded-md text-center text-green-300">
               <p className="text-sm">Printer IP: {printerIP}</p>
@@ -124,21 +150,26 @@ function Home() {
 
         {/* File Upload Section */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3 text-gray-300">Select PDF File</h2>
-          <div className="flex items-center justify-center w-full">
-            <label className="w-full flex flex-col items-center px-4 py-6 bg-gray-700 rounded-lg border-2 border-dashed border-gray-500 cursor-pointer hover:bg-gray-600 transition">
-              <Upload className="h-8 w-8 text-gray-400" />
-              <span className="mt-2 text-sm text-gray-400">
-                {selectedFile ? selectedFile.name : "Select PDF file"}
-              </span>
-              <input type="file" className="hidden" accept=".pdf" onChange={handleFileChange} />
-            </label>
-          </div>
+          <h2 className="text-lg font-semibold mb-3 text-gray-300">
+            Select PDF File
+          </h2>
+          <label className="w-full flex flex-col items-center px-4 py-6 bg-gray-700 rounded-lg border-2 border-dashed border-gray-500 cursor-pointer hover:bg-gray-600 transition">
+            <Upload className="h-8 w-8 text-gray-400" />
+            <span className="mt-2 text-sm text-gray-400">
+              {selectedFile ? selectedFile.name : "Select PDF file"}
+            </span>
+            <input
+              type="file"
+              className="hidden"
+              accept=".pdf"
+              onChange={handleFileChange}
+            />
+          </label>
         </div>
 
         {/* Print Button */}
         <button
-          onClick={handlePrint}
+          onClick={confirmPrint}
           disabled={!selectedFile || !printerIP}
           className={`w-full py-2 px-4 rounded-md transition-transform transform ${
             !selectedFile || !printerIP
@@ -149,7 +180,7 @@ function Home() {
           Print Document
         </button>
 
-        {/* Status Message */}
+        {/* Feedback Message */}
         {message && (
           <div
             className={`mt-4 p-2 rounded-md text-center text-sm font-medium ${
@@ -157,10 +188,40 @@ function Home() {
                 ? "bg-green-600 text-green-100"
                 : status === "error"
                 ? "bg-red-600 text-red-100"
+                : status === "printing"
+                ? "bg-blue-700 text-blue-100"
                 : "bg-gray-700 text-gray-300"
             }`}
           >
+            {status === "success" && <CheckCircle className="inline w-4 h-4 mr-2" />}
+            {status === "error" && <AlertCircle className="inline w-4 h-4 mr-2" />}
             {message}
+          </div>
+        )}
+
+        {/* Modal for Print Confirmation */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-600 max-w-sm w-full">
+              <h3 className="text-xl text-white font-semibold mb-4">Confirm Print</h3>
+              <p className="text-gray-300 mb-4">
+                Are you sure you want to print <strong>{selectedFile?.name}</strong>?
+              </p>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={handlePrint}
+                  className="bg-green-500 px-4 py-2 rounded text-white hover:bg-green-600"
+                >
+                  Yes, Print
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="bg-red-500 px-4 py-2 rounded text-white hover:bg-red-600"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
